@@ -85,6 +85,31 @@ export const sampleCard = {
   updated_at: '2023-01-01T00:00:00.000Z',
 };
 
+// Sample card with new MBQL stages format (Metabase 50+)
+export const sampleCardMbqlStages = {
+  id: 2,
+  name: 'Test Card MBQL Stages',
+  description: 'A test card with MBQL stages format',
+  database_id: 3,
+  dataset_query: {
+    'lib/type': 'mbql/query',
+    stages: [
+      {
+        'lib/type': 'mbql.stage/native',
+        native: 'SELECT id, name FROM users ORDER BY id DESC LIMIT 10',
+      },
+    ],
+    database: 3,
+    info: {
+      'card-entity-id': '8UAl7Dc2J3Oufk3Qw4OjM',
+    },
+    'lib.convert/converted?': true,
+  },
+  collection_id: 1,
+  created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
+};
+
 export const sampleDashboard = {
   id: 1,
   name: 'Test Dashboard',

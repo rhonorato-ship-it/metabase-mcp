@@ -17,6 +17,38 @@ export enum OptimizationLevel {
 }
 
 /**
+ * Extract native query information from a dataset_query object.
+ * Handles both old format (dataset_query.native.query) and new MBQL stages format
+ * (dataset_query.stages[0].native where lib/type is 'mbql.stage/native').
+ */
+function extractNativeQuery(
+  datasetQuery: any
+): { query?: string; template_tags?: Record<string, any> } | undefined {
+  // Old format: dataset_query.native.query
+  if (datasetQuery.native?.query) {
+    return {
+      query: datasetQuery.native.query,
+      template_tags: datasetQuery.native.template_tags,
+    };
+  }
+
+  // New MBQL stages format: dataset_query.stages[0].native
+  if (datasetQuery.stages && Array.isArray(datasetQuery.stages) && datasetQuery.stages.length > 0) {
+    const nativeStage = datasetQuery.stages.find(
+      (stage: any) => stage['lib/type'] === 'mbql.stage/native' && stage.native
+    );
+    if (nativeStage) {
+      return {
+        query: nativeStage.native,
+        template_tags: nativeStage.template_tags,
+      };
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Optimize card response by removing unnecessary fields that consume tokens
  * but aren't used by other handlers (execute_query, export_query, etc.)
  */
@@ -43,15 +75,11 @@ export function optimizeCardResponse(
 
   // Essential for execute_query and export_query - always include
   if (card.dataset_query) {
+    const nativeQuery = extractNativeQuery(card.dataset_query);
     optimized.dataset_query = {
       type: card.dataset_query.type,
       database: card.dataset_query.database,
-      native: card.dataset_query.native
-        ? {
-            query: card.dataset_query.native.query,
-            template_tags: card.dataset_query.native.template_tags,
-          }
-        : undefined,
+      native: nativeQuery,
     };
   }
 
@@ -260,15 +288,11 @@ export function optimizeDashboardResponse(
 
         // Essential for execute_query operations
         if (dashcard.card.dataset_query) {
+          const nativeQuery = extractNativeQuery(dashcard.card.dataset_query);
           optimizedDashcard.card.dataset_query = {
             type: dashcard.card.dataset_query.type,
             database: dashcard.card.dataset_query.database,
-            native: dashcard.card.dataset_query.native
-              ? {
-                  query: dashcard.card.dataset_query.native.query,
-                  template_tags: dashcard.card.dataset_query.native.template_tags,
-                }
-              : undefined,
+            native: nativeQuery,
           };
         }
 
