@@ -97,6 +97,13 @@ export const sampleCardMbqlStages = {
       {
         'lib/type': 'mbql.stage/native',
         native: 'SELECT id, name FROM users ORDER BY id DESC LIMIT 10',
+        'template-tags': {
+          user_id: {
+            name: 'user_id',
+            id: 'test-uuid-123',
+            type: 'number',
+          },
+        },
       },
     ],
     database: 3,

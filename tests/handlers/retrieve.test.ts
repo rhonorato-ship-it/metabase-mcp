@@ -274,7 +274,7 @@ describe('handleRetrieve', () => {
       expect(optimizedCard.dataset_query.native.query).toBe('SELECT * FROM test_table');
     });
 
-    it('should extract SQL query from new MBQL stages format (dataset_query.stages[].native)', async () => {
+    it('should extract SQL query and template-tags from new MBQL stages format (dataset_query.stages[].native)', async () => {
       mockApiClient.getCard.mockResolvedValue(createCachedResponse(sampleCardMbqlStages));
       const [logDebug, logInfo, logWarn, logError] = getLoggerFunctions();
 
@@ -289,6 +289,12 @@ describe('handleRetrieve', () => {
       expect(optimizedCard.dataset_query).toBeDefined();
       expect(optimizedCard.dataset_query.native).toBeDefined();
       expect(optimizedCard.dataset_query.native.query).toBe('SELECT id, name FROM users ORDER BY id DESC LIMIT 10');
+      expect(optimizedCard.dataset_query.native.template_tags).toBeDefined();
+      expect(optimizedCard.dataset_query.native.template_tags.user_id).toEqual({
+        name: 'user_id',
+        id: 'test-uuid-123',
+        type: 'number',
+      });
     });
 
     it('should handle cards with no native query (MBQL visual query)', async () => {

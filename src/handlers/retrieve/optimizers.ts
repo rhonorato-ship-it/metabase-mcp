@@ -40,7 +40,7 @@ function extractNativeQuery(
     if (nativeStage) {
       return {
         query: nativeStage.native,
-        template_tags: nativeStage.template_tags,
+        template_tags: nativeStage['template-tags'],
       };
     }
   }
