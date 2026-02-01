@@ -13,6 +13,7 @@ import {
   createCachedResponse,
   getLoggerFunctions,
   sampleCard,
+  sampleCardMbqlStages,
   sampleDashboard,
   sampleTable,
   sampleDatabase,
@@ -254,6 +255,75 @@ describe('handleRetrieve', () => {
       const responseData = JSON.parse(result.content[0].text);
       expect(responseData.successful_retrievals).toBe(1);
       expect(responseData.failed_retrievals).toBe(1);
+    });
+
+    it('should extract SQL query from old native format (dataset_query.native.query)', async () => {
+      mockApiClient.getCard.mockResolvedValue(createCachedResponse(sampleCard));
+      const [logDebug, logInfo, logWarn, logError] = getLoggerFunctions();
+
+      const request = createMockRequest('retrieve', { model: 'card', ids: [1] });
+      const result = await handleRetrieve(request, 'test-request-id', mockApiClient as any, logDebug, logInfo, logWarn, logError);
+
+      expect(result.content).toHaveLength(1);
+      const responseData = JSON.parse(result.content[0].text);
+      expect(responseData.results).toHaveLength(1);
+
+      const optimizedCard = responseData.results[0];
+      expect(optimizedCard.dataset_query).toBeDefined();
+      expect(optimizedCard.dataset_query.native).toBeDefined();
+      expect(optimizedCard.dataset_query.native.query).toBe('SELECT * FROM test_table');
+    });
+
+    it('should extract SQL query and template-tags from new MBQL stages format (dataset_query.stages[].native)', async () => {
+      mockApiClient.getCard.mockResolvedValue(createCachedResponse(sampleCardMbqlStages));
+      const [logDebug, logInfo, logWarn, logError] = getLoggerFunctions();
+
+      const request = createMockRequest('retrieve', { model: 'card', ids: [2] });
+      const result = await handleRetrieve(request, 'test-request-id', mockApiClient as any, logDebug, logInfo, logWarn, logError);
+
+      expect(result.content).toHaveLength(1);
+      const responseData = JSON.parse(result.content[0].text);
+      expect(responseData.results).toHaveLength(1);
+
+      const optimizedCard = responseData.results[0];
+      expect(optimizedCard.dataset_query).toBeDefined();
+      expect(optimizedCard.dataset_query.native).toBeDefined();
+      expect(optimizedCard.dataset_query.native.query).toBe('SELECT id, name FROM users ORDER BY id DESC LIMIT 10');
+      expect(optimizedCard.dataset_query.native.template_tags).toBeDefined();
+      expect(optimizedCard.dataset_query.native.template_tags.user_id).toEqual({
+        name: 'user_id',
+        id: 'test-uuid-123',
+        type: 'number',
+      });
+    });
+
+    it('should handle cards with no native query (MBQL visual query)', async () => {
+      const mbqlVisualCard = {
+        id: 3,
+        name: 'Visual Query Card',
+        database_id: 1,
+        dataset_query: {
+          type: 'query',
+          query: {
+            'source-table': 123,
+          },
+          database: 1,
+        },
+      };
+
+      mockApiClient.getCard.mockResolvedValue(createCachedResponse(mbqlVisualCard));
+      const [logDebug, logInfo, logWarn, logError] = getLoggerFunctions();
+
+      const request = createMockRequest('retrieve', { model: 'card', ids: [3] });
+      const result = await handleRetrieve(request, 'test-request-id', mockApiClient as any, logDebug, logInfo, logWarn, logError);
+
+      expect(result.content).toHaveLength(1);
+      const responseData = JSON.parse(result.content[0].text);
+      expect(responseData.results).toHaveLength(1);
+
+      const optimizedCard = responseData.results[0];
+      expect(optimizedCard.dataset_query).toBeDefined();
+      expect(optimizedCard.dataset_query.native).toBeUndefined();
     });
 
     it('should include values_source_type and values_source_config in card parameters', async () => {
