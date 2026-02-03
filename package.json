@@ -39,23 +39,23 @@
     "mcpb:validate": "echo 'MCPB validation - checking manifest structure' && node -e \"const fs = require('fs'); const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8')); console.log('Manifest valid:', manifest.name, manifest.version);\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.23.0",
+    "@modelcontextprotocol/sdk": "^1.25.3",
     "@types/xlsx": "^0.0.35",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zod": "^3.25.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^20.17.22",
-    "@vitest/coverage-v8": "^4.0.15",
+    "@types/node": "^20.19.31",
+    "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^8.2.2",
     "eslint": "^9.39.2",
-    "husky": "^9.0.11",
-    "nodemon": "^3.0.2",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^8.49.0",
-    "vitest": "^4.0.15"
+    "husky": "^9.1.7",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^4.0.18"
   },
   "keywords": [
     "metabase",
